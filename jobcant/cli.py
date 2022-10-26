@@ -7,10 +7,21 @@ from jobcant.config import Config
 from jobcant.jobcan import JobcanClient
 
 
-def balance() -> None:
+def balance(exclude_last_day: bool) -> None:
     attendance_table = _get_attendance_table()
-    print(f"Monthly overtime balance: {plotting.get_overtime_balance(attendance_table)}")
-    print(f"Weekly overtime balance: {plotting.get_overtime_balance(plotting.last_week(attendance_table))}")
+    month = attendance_table[:-1] if exclude_last_day else attendance_table
+    last_week = plotting.last_week(attendance_table)
+    print(f"Monthly overtime balance: {plotting.get_overtime_balance(month)}")
+    print(f"Weekly overtime balance: {plotting.get_overtime_balance(last_week)}")
+
+    if exclude_last_day:
+        return
+
+    last_day = attendance_table[-1]
+    print("\nLast day:")
+    print(f"  Clock-in: {last_day[2]}")
+    print(f"  Working hours: {last_day[4]}")
+    print(f"  Break: {last_day[5]}")
 
 
 def update_config() -> None:
@@ -25,28 +36,42 @@ def update_config() -> None:
     config.save()
 
 
-def graph() -> None:
+def graph(exclude_last_day: bool) -> None:
     attendance_table = _get_attendance_table()
+    if exclude_last_day and len(attendance_table) > 1:
+        attendance_table = attendance_table[:-1]
     days, history = plotting.get_overtime_history(attendance_table)
     plotting.plot_overtime_balance_history(days, history)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(prog="jobcant")
-    parser.set_defaults(method=balance)
-    subparsers = parser.add_subparsers(required=False)
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
     balance_parser = subparsers.add_parser("balance", help="Calculate overtime balance")
-    balance_parser.set_defaults(method=balance)
+    balance_parser.add_argument(
+        "--exclude-last-day",
+        action="store_true",
+        help="Exclude last/current day from the calculation"
+    )
 
-    config_parser = subparsers.add_parser("config", help="Init or update config")
-    config_parser.set_defaults(method=update_config)
+    subparsers.add_parser("config", help="Init or update config")
 
     graph_parser = subparsers.add_parser("graph", help="Display a graph of overtime balance over the month")
-    graph_parser.set_defaults(method=graph)
+    graph_parser.add_argument(
+        "--exclude-last-day",
+        action="store_true",
+        help="Exclude last/current day from the graph"
+    )
 
     args = parser.parse_args(sys.argv[1:])
-    args.method()
+    match args.command:
+        case "balance":
+            balance(exclude_last_day=args.exclude_last_day)
+        case "config":
+            update_config()
+        case "graph":
+            graph(exclude_last_day=args.exclude_last_day)
 
 
 def _get_attendance_table() -> list[list[str]]:
@@ -59,7 +84,13 @@ def _get_attendance_table() -> list[list[str]]:
             client_code=config.jobcan_client_code,
             password=config.jobcan_password
     )
-    return jobcan_client.get_attendance_table()
+    attendance_table = jobcan_client.get_attendance_table()
+    # Remove rows without working hours
+    attendance_table = [
+        row for row in attendance_table
+        if row[4]
+    ]
+    return attendance_table
 
 
 if __name__ == "__main__":
