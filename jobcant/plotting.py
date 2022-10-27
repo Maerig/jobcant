@@ -22,6 +22,12 @@ def get_overtime_balance(attendance_table: list[list[str]]) -> Duration:
     return sum(history, Duration())
 
 
+def get_leave_time(attendance_table: list[list[str]]) -> Duration:
+    month_balance = get_overtime_balance(attendance_table[:-1])
+    last_clock_in = Duration.parse(attendance_table[-1][2])
+    return last_clock_in + Duration(8 * 60) - month_balance
+
+
 def last_week(attendance_table: list[list[str]]) -> list[list[str]]:
     last_week_rows: list[list[str]] = []
     for row in reversed(attendance_table):

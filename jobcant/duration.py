@@ -21,3 +21,12 @@ class Duration:
 
     def __mul__(self, other):
         return Duration(other * self.minutes)
+
+    def __lt__(self, other):
+        return self.minutes < other.minutes
+
+    def __gt__(self, other):
+        return self.minutes > other.minutes
+
+    def __abs__(self):
+        return Duration(abs(self.minutes))

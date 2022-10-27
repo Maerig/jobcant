@@ -4,6 +4,7 @@ from getpass import getpass
 
 from jobcant import plotting
 from jobcant.config import Config
+from jobcant.duration import Duration
 from jobcant.jobcan import JobcanClient
 
 
@@ -22,6 +23,15 @@ def balance(exclude_last_day: bool) -> None:
     print(f"  Clock-in: {last_day[2]}")
     print(f"  Working hours: {last_day[4]}")
     print(f"  Break: {last_day[5]}")
+
+
+def when_to_leave() -> None:
+    attendance_table = _get_attendance_table()
+    leave_time = plotting.get_leave_time(attendance_table)
+    if leave_time < Duration(0):
+        print("Leave today as early as you like.")
+    else:
+        print(f"Leave today at {leave_time} to avoid overtime.")
 
 
 def update_config() -> None:
@@ -55,6 +65,8 @@ def main() -> None:
         help="Exclude last/current day from the calculation"
     )
 
+    subparsers.add_parser("when", help="Calculate at which time to leave to avoid overtime this month")
+
     subparsers.add_parser("config", help="Init or update config")
 
     graph_parser = subparsers.add_parser("graph", help="Display a graph of overtime balance over the month")
@@ -68,6 +80,8 @@ def main() -> None:
     match args.command:
         case "balance":
             balance(exclude_last_day=args.exclude_last_day)
+        case "when":
+            when_to_leave()
         case "config":
             update_config()
         case "graph":
