@@ -1,6 +1,8 @@
 class Duration:
     @classmethod
     def parse(cls, duration: str):
+        if duration == "":
+            return cls(0)
         hours, minutes = duration.split(":")
         total_minutes = 60 * int(hours) + int(minutes)
         return cls(total_minutes)
@@ -27,6 +29,12 @@ class Duration:
 
     def __gt__(self, other):
         return self.minutes > other.minutes
+
+    def __le__(self, other):
+        return self.minutes <= other.minutes
+
+    def __ge__(self, other):
+        return self.minutes >= other.minutes
 
     def __abs__(self):
         return Duration(abs(self.minutes))

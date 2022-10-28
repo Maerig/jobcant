@@ -4,7 +4,6 @@ from getpass import getpass
 
 from jobcant import plotting
 from jobcant.config import Config
-from jobcant.duration import Duration
 from jobcant.jobcan import JobcanClient
 
 
@@ -28,7 +27,8 @@ def balance(exclude_last_day: bool) -> None:
 def when_to_leave() -> None:
     attendance_table = _get_attendance_table()
     leave_time = plotting.get_leave_time(attendance_table)
-    if leave_time < Duration(0):
+    current_time = plotting.get_current_time(attendance_table)
+    if leave_time <= current_time:
         print("Leave today as early as you like.")
     else:
         print(f"Leave today at {leave_time} to avoid overtime.")

@@ -22,10 +22,41 @@ def get_overtime_balance(attendance_table: list[list[str]]) -> Duration:
     return sum(history, Duration())
 
 
+def get_today_last_clock_in(attendance_table: list[list[str]]) -> Duration:
+    return Duration.parse(attendance_table[-1][2])
+
+
+def get_today_working_hours(attendance_table: list[list[str]]) -> Duration:
+    return Duration.parse(attendance_table[-1][4])
+
+
+def get_today_break_length(attendance_table: list[list[str]]) -> Duration:
+    return Duration.parse(attendance_table[-1][5])
+
+
+def get_current_time(attendance_table: list[list[str]]) -> Duration:
+    return (
+        get_today_last_clock_in(attendance_table) +
+        get_today_break_length(attendance_table) +
+        get_today_working_hours(attendance_table)
+    )
+
+
 def get_leave_time(attendance_table: list[list[str]]) -> Duration:
-    month_balance = get_overtime_balance(attendance_table[:-1])
-    last_clock_in = Duration.parse(attendance_table[-1][2])
-    return last_clock_in + Duration(8 * 60) - month_balance
+    day_base_hours = Duration(8 * 60)
+    min_hours_for_mandatory_break = Duration(6 * 60)
+    overtime_balance = get_overtime_balance(attendance_table[:-1])
+    last_clock_in = get_today_last_clock_in(attendance_table)
+
+    leave_time = last_clock_in + day_base_hours - overtime_balance
+
+    # When more than 6 hours must be achieved during the day,
+    # add a mandatory 1-hour break time.
+    required_today = day_base_hours - overtime_balance
+    if required_today > min_hours_for_mandatory_break:
+        leave_time += Duration(60)
+
+    return leave_time
 
 
 def last_week(attendance_table: list[list[str]]) -> list[list[str]]:
