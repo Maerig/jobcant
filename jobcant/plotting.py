@@ -42,21 +42,23 @@ def get_current_time(attendance_table: list[list[str]]) -> Duration:
     )
 
 
-def get_leave_time(attendance_table: list[list[str]]) -> Duration:
+def get_leave_time(attendance_table: list[list[str]]) -> tuple[Duration, bool]:
     day_base_hours = Duration(8 * 60)
     min_hours_for_mandatory_break = Duration(6 * 60)
     overtime_balance = get_overtime_balance(attendance_table[:-1])
     last_clock_in = get_today_last_clock_in(attendance_table)
+    today_break = get_today_break_length(attendance_table)
 
     leave_time = last_clock_in + day_base_hours - overtime_balance
 
     # When more than 6 hours must be achieved during the day,
     # add a mandatory 1-hour break time.
     required_today = day_base_hours - overtime_balance
-    if required_today > min_hours_for_mandatory_break:
+    if (required_today > min_hours_for_mandatory_break) or (today_break > Duration(0)):
         leave_time += Duration(60)
+        return leave_time, True
 
-    return leave_time
+    return leave_time, False
 
 
 def last_week(attendance_table: list[list[str]]) -> list[list[str]]:
