@@ -26,12 +26,14 @@ def balance(exclude_last_day: bool) -> None:
 
 def when_to_leave() -> None:
     attendance_table = _get_attendance_table()
-    leave_time = plotting.get_leave_time(attendance_table)
+    leave_time, includes_break = plotting.get_leave_time(attendance_table)
     current_time = plotting.get_current_time(attendance_table)
     if leave_time <= current_time:
         print("Leave today as early as you like.")
-    else:
-        print(f"Leave today at {leave_time} to avoid overtime.")
+        return
+
+    break_msg = "(includes a 1-hour break)" if includes_break else "(break time not included)"
+    print(f"Leave today at {leave_time} to avoid overtime {break_msg}.")
 
 
 def update_config() -> None:
