@@ -27,7 +27,7 @@ class Config:
         if not os.path.isfile(CONFIG_PATH):
             return None
 
-        config = configparser.ConfigParser()
+        config = configparser.ConfigParser(interpolation=None)
         config.read(CONFIG_PATH)
         return cls(
             jobcan_email=config["jobcan"]["email"],
@@ -36,7 +36,7 @@ class Config:
         )
 
     def save(self):
-        config = configparser.ConfigParser()
+        config = configparser.ConfigParser(interpolation=None)
         config["jobcan"] = {
             "email": self.jobcan_email,
             "clientCode": self.jobcan_client_code or "",
