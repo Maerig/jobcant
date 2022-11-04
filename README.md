@@ -30,6 +30,13 @@ $ jobcant graph
 
 ![Overtime balance graph](./doc/graph_example.png)
 
+### When to leave
+
+```shell
+$ jobcant when
+Leave today at 17:43 to avoid overtime (includes a 1-hour break).
+```
+
 ## Config
 
 ### Environment variables
