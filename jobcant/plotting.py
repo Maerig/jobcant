@@ -61,19 +61,6 @@ def get_leave_time(attendance_table: list[list[str]]) -> tuple[Duration, bool]:
     return leave_time, False
 
 
-def last_week(attendance_table: list[list[str]]) -> list[list[str]]:
-    last_week_rows: list[list[str]] = []
-    for row in reversed(attendance_table):
-        # Iterate until last worked day
-        if not (last_week_rows or row[4]):
-            continue
-        last_week_rows = [row] + last_week_rows
-        if row[0].endswith("(Mon)"):
-            break
-
-    return last_week_rows
-
-
 def plot_overtime_balance_history(days: list[str], overtime_history: list[Duration]) -> None:
     cumulative_overtime_history = []
     for overtime in overtime_history:
