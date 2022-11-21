@@ -12,7 +12,8 @@ def get_overtime_history(attendance_table: list[list[str]]) -> tuple[list[str], 
 
         days.append(row[0])
         working_hours = Duration.parse(row[4])
-        overtime_history.append(working_hours - Duration(8 * 60))
+        required_hours = Duration(0 if row[1] else 8 * 60)  # No required hours for holidays
+        overtime_history.append(working_hours - required_hours)
 
     return days, overtime_history
 
