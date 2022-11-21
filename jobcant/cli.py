@@ -10,9 +10,7 @@ from jobcant.jobcan import JobcanClient
 def balance(exclude_last_day: bool) -> None:
     attendance_table = _get_attendance_table()
     month = attendance_table[:-1] if exclude_last_day else attendance_table
-    last_week = plotting.last_week(attendance_table)
     print(f"Monthly overtime balance: {plotting.get_overtime_balance(month)}")
-    print(f"Weekly overtime balance: {plotting.get_overtime_balance(last_week)}")
 
     if exclude_last_day:
         return
